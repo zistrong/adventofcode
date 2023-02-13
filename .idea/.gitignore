@@ -1,0 +1,16 @@
+*.iml
+*.ipr
+*.iws
+.idea
+*/*.log
+buildNumber.properties
+*/target/
+*.DS_Store
+*.classpath
+*.settings
+*.project
+docker-tool/dependency-check-report.html
+*/.factorypath
+
+/.polaris-coverity.zip
+/.synopsys/*
