@@ -1,11 +1,14 @@
 package com.zistrong.adventofcode;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +40,48 @@ public class Day2 {
     Map<String, Integer> matchScores = new HashMap<>();
     Map<String, Integer> scores2 = new HashMap<>();
 
+    private Map<String, Integer> patternScore = new HashMap<>();
+
+    //1 for Rock, 2 for Paper, and 3 for Scissors
+    // win 6 draw 3 lost 0
+    private void initValue() {
+
+        patternScore.put("A X", 4);//1+3
+        patternScore.put("A Y", 8);//2+6
+        patternScore.put("A Z", 3);//3+0
+        patternScore.put("B X", 1);//1+0
+        patternScore.put("B Y", 5);//2+3
+        patternScore.put("B Z", 9);//3+6
+        patternScore.put("C X", 7);//1+6
+        patternScore.put("C Y", 2);//2+0
+        patternScore.put("C Z", 6);//3+3
+
+    }
+
+    private List<String> getList() {
+        try {
+            return Files.readAllLines(Paths.get("./src/test/resources/", "day2.input"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<String>();
+    }
+
+    /**
+     */
+    @Test
+    public void part1() {
+
+        this.initValue();
+        int totalScore = 0;
+        List<String> list = getList();
+        for (String list2 : list) {
+            totalScore += patternScore.get(list2);
+        }
+        System.out.println(totalScore);
+
+    }
+    
     @Test
     public void part2() throws IOException {
 
@@ -47,7 +92,7 @@ public class Day2 {
         for (String content : contents) {
             score += (scores2.get(relation.get(content)) + matchScores.get(content.split(space)[1]));
         }
-        System.out.println(score);
+        Assert.assertEquals(10498, score);
 
     }
 
