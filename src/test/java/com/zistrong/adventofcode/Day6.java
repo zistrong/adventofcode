@@ -1,11 +1,11 @@
 package com.zistrong.adventofcode;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class Day6 {
 
@@ -26,7 +26,7 @@ public class Day6 {
             String sub = this.content.substring(i, i + len);
             boolean flag = true;
             for (int j = 0; j < sub.length() - 1; j++) {
-                if (sub.substring(j + 1, sub.length()).indexOf(sub.charAt(j)) >= 0) {
+                if (sub.substring(j + 1).indexOf(sub.charAt(j)) >= 0) {
                     flag = false;
                     break;
                 }
