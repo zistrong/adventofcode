@@ -33,14 +33,13 @@ public class Day2 {
      * <p>
      * Following the Elf's instructions for the second column, what would your total score be if everything goes exactly according to your strategy guide?
      *
-     * @throws IOException
      */
 
     Map<String, String> relation = new HashMap<>();
     Map<String, Integer> matchScores = new HashMap<>();
     Map<String, Integer> scores2 = new HashMap<>();
 
-    private Map<String, Integer> patternScore = new HashMap<>();
+    private final Map<String, Integer> patternScore = new HashMap<>();
 
     //1 for Rock, 2 for Paper, and 3 for Scissors
     // win 6 draw 3 lost 0
@@ -64,7 +63,7 @@ public class Day2 {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     /**

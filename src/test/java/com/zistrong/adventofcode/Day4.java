@@ -68,17 +68,17 @@ public class Day4 {
         int count = 0;
         List<String> contents = Files.readAllLines(Path.of("./src/test/resources/", "day4.input"));
         for (String content : contents) {
-            String firstGroup = content.split("\\,")[0];
-            String secondGroup = content.split("\\,")[1];
-            int firstBegin = Integer.parseInt(firstGroup.split("\\-")[0]);
-            int firstEnd = Integer.parseInt(firstGroup.split("\\-")[1]);
-            int secondBegin = Integer.parseInt(secondGroup.split("\\-")[0]);
-            int secondEnd = Integer.parseInt(secondGroup.split("\\-")[1]);
+            String firstGroup = content.split(",")[0];
+            String secondGroup = content.split(",")[1];
+            int firstBegin = Integer.parseInt(firstGroup.split("-")[0]);
+            int firstEnd = Integer.parseInt(firstGroup.split("-")[1]);
+            int secondBegin = Integer.parseInt(secondGroup.split("-")[0]);
+            int secondEnd = Integer.parseInt(secondGroup.split("-")[1]);
             if ((firstBegin >= secondBegin && firstEnd <= secondEnd) || (firstBegin <= secondBegin && firstEnd >= secondEnd)) {
                 count++;
             }
         }
-        Assert.assertTrue(534 == count);
+        Assert.assertEquals(534, count);
     }
 
     /**
@@ -103,7 +103,6 @@ public class Day4 {
      * <p>
      * In how many assignment pairs do the ranges overlap?
      *
-     * @throws IOException
      */
     @Test
     public void part2() throws IOException {
@@ -111,17 +110,17 @@ public class Day4 {
         List<String> contents = Files.readAllLines(Path.of("./src/test/resources/", "day4.input"));
         for (String content : contents) {
 
-            String firstGroup = content.split("\\,")[0];
-            String secondGroup = content.split("\\,")[1];
-            int firstBegin = Integer.parseInt(firstGroup.split("\\-")[0]);
-            int firstEnd = Integer.parseInt(firstGroup.split("\\-")[1]);
-            int secondBegin = Integer.parseInt(secondGroup.split("\\-")[0]);
-            int secondEnd = Integer.parseInt(secondGroup.split("\\-")[1]);
+            String firstGroup = content.split(",")[0];
+            String secondGroup = content.split(",")[1];
+            int firstBegin = Integer.parseInt(firstGroup.split("-")[0]);
+            int firstEnd = Integer.parseInt(firstGroup.split("-")[1]);
+            int secondBegin = Integer.parseInt(secondGroup.split("-")[0]);
+            int secondEnd = Integer.parseInt(secondGroup.split("-")[1]);
             if (!(firstBegin > secondEnd || firstEnd < secondBegin)) {
                 count++;
             }
         }
-        Assert.assertTrue(841 == count);
+        Assert.assertEquals(841, count);
     }
 }
 

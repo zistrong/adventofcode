@@ -1,13 +1,12 @@
 package com.zistrong.adventofcode;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -54,6 +53,7 @@ public class Day7 {
         this.size = updateSpace;
         findMyFile(root, atLeastToFreeSize);
         System.out.println(size);
+        Assert.assertEquals(6400111, size);
 
 
     }
@@ -169,6 +169,7 @@ public class Day7 {
         visitStack.clear();
         getTotalSizeAtMost100000(root);
         System.out.println(this.totalSize);
+        Assert.assertEquals(1491614, this.totalSize);
     }
 
     long totalSize = 0;
@@ -191,7 +192,6 @@ public class Day7 {
 
     /**
      * stack， save directory， cd xx， push stack， cd .. , pop stack
-     *
      */
     @Before
     public void readContent() throws IOException {
@@ -218,44 +218,12 @@ public class Day7 {
             }
 
         } else if (str.startsWith("dir")) {
-            this.currentDirectory.getChildren().add(new MyFile(str.split(" ")[1], true));
+            this.currentDirectory.addChild(new MyFile(str.split(" ")[1], true));
         } else {
-            this.currentDirectory.getChildren().add(new MyFile(str.split(" ")[1], Integer.parseInt(str.split(" ")[0])));
+            this.currentDirectory.addChild(new MyFile(str.split(" ")[1], Integer.parseInt(str.split(" ")[0])));
         }
     }
 
 
 }
 
-class MyFile implements Serializable {
-    private final String name;
-    private boolean directory = false;
-    private int size;
-    private final List<MyFile> children = new ArrayList<>();
-
-    public MyFile(String name, boolean directory) {
-        this.name = name;
-        this.directory = directory;
-    }
-
-    public MyFile(String name, int size) {
-        this.name = name;
-        this.size = size;
-    }
-
-    public boolean isDirectory() {
-        return directory;
-    }
-
-    public int getSize() {
-        return directory ? this.children.stream().mapToInt(MyFile::getSize).sum() : size;
-    }
-
-    public List<MyFile> getChildren() {
-        return children;
-    }
-
-    public String getName() {
-        return name;
-    }
-}
