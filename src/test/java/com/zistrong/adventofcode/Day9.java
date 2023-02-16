@@ -7,8 +7,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Day9 {
@@ -774,6 +776,69 @@ public class Day9 {
     @Test
     public void part2() {
 
+        String space = " ";
+        Set<String> set = new HashSet<>();
+        set.add("0$0");
+
+        int head_x = 0, head_y = 0;
+        Map<Integer, Integer> xs = new HashMap<>();
+        Map<Integer, Integer> ys = new HashMap<>();
+        for (String step : this.steps) {
+            String direction = step.split(space)[0];
+            int stepNumber = Integer.parseInt(step.split(space)[1]);
+            for (int i = 0; i < stepNumber; i++) {
+                switch (direction) {
+                    case "D": {
+                        head_x--;
+                        break;
+                    }
+                    case "U": {
+                        head_x++;
+                        break;
+                    }
+                    case "L": {
+                        head_y--;
+                        break;
+                    }
+                    case "R": {
+                        head_y++;
+                        break;
+                    }
+                }
+
+                int h_x = head_x;
+                int h_y = head_y;
+                int t_x = 0;
+                int t_y = 0;
+                
+                for(int j = 0;j < 10;j++) {
+
+                    t_x = xs.getOrDefault(j, 0);
+                    t_y = ys.getOrDefault(j, 0);
+                    if (Math.abs(t_y - h_y) == 2) {
+                        if (t_x != h_x) {
+                            t_x = h_x > t_x ? t_x + 1 : t_x - 1;
+                        }
+                        t_y = h_y > t_y ? t_y + 1 : t_y - 1;
+                    }
+                    if (Math.abs(t_x - h_x) == 2) {
+                        if (t_y != h_y) {
+                            t_y = h_y > t_y ? t_y + 1 : t_y - 1;
+                        }
+                        t_x = h_x > t_x ? t_x + 1 : t_x - 1;
+                        
+                    }
+                    xs.put(j, t_x);
+                    ys.put(j, t_y);
+                    h_x = t_x;
+                    h_y = t_y;
+                }
+                set.add(t_x + "$" + t_y);
+
+            }
+        }
+        System.out.println(set.size());
+        //Assert.assertEquals(5513, set.size());
     }
 
     List<String> steps;
