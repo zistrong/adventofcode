@@ -281,7 +281,7 @@ public class Day9 {
 
         String space = " ";
         Set<String> set = new HashSet<>();
-        set.add("0$0");
+        set.add("0$0");//reference point, always visit
 
         int h_x = 0, h_y = 0;
         int t_x = 0, t_y = 0;
@@ -332,193 +332,193 @@ public class Day9 {
 
     /**
      * --- Part Two ---
-     *
+     * <p>
      * A rope snaps! Suddenly, the river is getting a lot closer than you remember. The bridge is still there,
      * but some ropes that broke are now whipping toward you as you fall through the air!
-     *
+     * <p>
      * The ropes are moving too quickly to grab; you only have a few seconds to choose how to arch your body to avoid being hit.
      * Fortunately, your simulation can be extended to support longer ropes.
-     *
+     * <p>
      * Rather than two knots, you now must simulate a rope consisting of ten knots.
      * One knot is still the head of the rope and moves according to the series of motions.
      * Each knot further down the rope follows the knot in front of it using the same rules as before.
-     *
+     * <p>
      * Using the same series of motions as the above example, but with the knots marked H, 1, 2, ..., 9, the motions now occur as follows:
-     *
+     * <p>
      * == Initial State ==
-     *
+     * <p>
      * ......
      * ......
      * ......
      * ......
      * H.....  (H covers 1, 2, 3, 4, 5, 6, 7, 8, 9, s)
-     *
+     * <p>
      * == R 4 ==
-     *
+     * <p>
      * ......
      * ......
      * ......
      * ......
      * 1H....  (1 covers 2, 3, 4, 5, 6, 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ......
      * ......
      * ......
      * 21H...  (2 covers 3, 4, 5, 6, 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ......
      * ......
      * ......
      * 321H..  (3 covers 4, 5, 6, 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ......
      * ......
      * ......
      * 4321H.  (4 covers 5, 6, 7, 8, 9, s)
-     *
+     * <p>
      * == U 4 ==
-     *
+     * <p>
      * ......
      * ......
      * ......
      * ....H.
      * 4321..  (4 covers 5, 6, 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ......
      * ....H.
      * .4321.
      * 5.....  (5 covers 6, 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ....H.
      * ....1.
      * .432..
      * 5.....  (5 covers 6, 7, 8, 9, s)
-     *
+     * <p>
      * ....H.
      * ....1.
      * ..432.
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * == L 3 ==
-     *
+     * <p>
      * ...H..
      * ....1.
      * ..432.
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ..H1..
      * ...2..
      * ..43..
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * .H1...
      * ...2..
      * ..43..
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * == D 1 ==
-     *
+     * <p>
      * ..1...
      * .H.2..
      * ..43..
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * == R 4 ==
-     *
+     * <p>
      * ..1...
      * ..H2..
      * ..43..
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ..1...
      * ...H..  (H covers 2)
      * ..43..
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ...1H.  (1 covers 2)
      * ..43..
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ...21H
      * ..43..
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * == D 1 ==
-     *
+     * <p>
      * ......
      * ...21.
      * ..43.H
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * == L 5 ==
-     *
+     * <p>
      * ......
      * ...21.
      * ..43H.
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ...21.
      * ..4H..  (H covers 3)
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ...2..
      * ..H1..  (H covers 4; 1 covers 3)
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ...2..
      * .H13..  (1 covers 4)
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ......
      * H123..  (2 covers 4)
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * == R 2 ==
-     *
+     * <p>
      * ......
      * ......
      * .H23..  (H covers 1; 2 covers 4)
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * ......
      * ......
      * .1H3..  (H covers 2, 4)
      * .5....
      * 6.....  (6 covers 7, 8, 9, s)
-     *
+     * <p>
      * Now, you need to keep track of the positions the new tail, 9, visits. In this example, the tail never moves,
      * and so it only visits 1 position. However, be careful: more types of motion are possible than before,
      * so you might want to visually compare your simulated rope to the one above.
-     *
+     * <p>
      * Here's a larger example:
-     *
+     * <p>
      * R 5
      * U 8
      * L 8
@@ -527,11 +527,11 @@ public class Day9 {
      * D 10
      * L 25
      * U 20
-     *
+     * <p>
      * These motions occur as follows (individual steps are not shown):
-     *
+     * <p>
      * == Initial State ==
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -553,9 +553,9 @@ public class Day9 {
      * ..........................
      * ..........................
      * ..........................
-     *
+     * <p>
      * == R 5 ==
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -577,9 +577,9 @@ public class Day9 {
      * ..........................
      * ..........................
      * ..........................
-     *
+     * <p>
      * == U 8 ==
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -601,9 +601,9 @@ public class Day9 {
      * ..........................
      * ..........................
      * ..........................
-     *
+     * <p>
      * == L 8 ==
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -625,9 +625,9 @@ public class Day9 {
      * ..........................
      * ..........................
      * ..........................
-     *
+     * <p>
      * == D 3 ==
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -649,9 +649,9 @@ public class Day9 {
      * ..........................
      * ..........................
      * ..........................
-     *
+     * <p>
      * == R 17 ==
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -673,9 +673,9 @@ public class Day9 {
      * ..........................
      * ..........................
      * ..........................
-     *
+     * <p>
      * == D 10 ==
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -697,9 +697,9 @@ public class Day9 {
      * .........................2
      * .........................1
      * .........................H
-     *
+     * <p>
      * == L 25 ==
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -721,9 +721,9 @@ public class Day9 {
      * ..........................
      * ..........................
      * H123456789................
-     *
+     * <p>
      * == U 20 ==
-     *
+     * <p>
      * H.........................
      * 1.........................
      * 2.........................
@@ -745,9 +745,9 @@ public class Day9 {
      * ..........................
      * ..........................
      * ..........................
-     *
+     * <p>
      * Now, the tail (9) visits 36 positions (including s) at least once:
-     *
+     * <p>
      * ..........................
      * ..........................
      * ..........................
@@ -769,20 +769,20 @@ public class Day9 {
      * .......#..........#.......
      * ........#........#........
      * .........########.........
-     *
+     * <p>
      * Simulate your complete series of motions on a larger rope with ten knots.
      * How many positions does the tail of the rope visit at least once?
      */
     @Test
     public void part2() {
-
+        int knots = 9;// 1 is the first part
         String space = " ";
         Set<String> set = new HashSet<>();
-        set.add("0$0");
+        set.add("0$0");//reference point, always visit
 
         int head_x = 0, head_y = 0;
-        Map<Integer, Integer> xs = new HashMap<>();
-        Map<Integer, Integer> ys = new HashMap<>();
+        Map<Integer, Integer> xCoordinate = new HashMap<>();//recode x coordinate of each knot
+        Map<Integer, Integer> yCoordinate = new HashMap<>();//recode y coordinate of each knot
         for (String step : this.steps) {
             String direction = step.split(space)[0];
             int stepNumber = Integer.parseInt(step.split(space)[1]);
@@ -810,11 +810,11 @@ public class Day9 {
                 int h_y = head_y;
                 int t_x = 0;
                 int t_y = 0;
-                
-                for(int j = 0;j < 10;j++) {
 
-                    t_x = xs.getOrDefault(j, 0);
-                    t_y = ys.getOrDefault(j, 0);
+                for (int j = 0; j < knots; j++) {
+
+                    t_x = xCoordinate.getOrDefault(j, 0);
+                    t_y = yCoordinate.getOrDefault(j, 0);
                     if (Math.abs(t_y - h_y) == 2) {
                         if (t_x != h_x) {
                             t_x = h_x > t_x ? t_x + 1 : t_x - 1;
@@ -826,10 +826,10 @@ public class Day9 {
                             t_y = h_y > t_y ? t_y + 1 : t_y - 1;
                         }
                         t_x = h_x > t_x ? t_x + 1 : t_x - 1;
-                        
+
                     }
-                    xs.put(j, t_x);
-                    ys.put(j, t_y);
+                    xCoordinate.put(j, t_x);
+                    yCoordinate.put(j, t_y);
                     h_x = t_x;
                     h_y = t_y;
                 }
@@ -837,8 +837,8 @@ public class Day9 {
 
             }
         }
-        System.out.println(set.size());
-        //Assert.assertEquals(5513, set.size());
+        //System.out.println(set.size());
+        Assert.assertEquals(2427, set.size());
     }
 
     List<String> steps;
