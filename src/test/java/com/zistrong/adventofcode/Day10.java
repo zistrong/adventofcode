@@ -399,6 +399,46 @@ public class Day10 {
     @Test
     public void part2() {
 
+        char[][] screen = new char[6][40];
+        int X = 1;
+        
+
+        int screenX = 0;
+        int rowLenght = 40;
+
+        for (String step : this.steps) {
+            
+
+            int k = 2;
+            if ("noop".equals(step)) {
+                k = 1;
+            } else {
+                k = 2;
+            }
+
+            for(int i = 0;i < k;i++) {                
+                if(screenX % rowLenght >= X - 1 && screenX % rowLenght <= X + 1) {
+                    screen[screenX/rowLenght][screenX%rowLenght] = '#';
+                } else {
+                    screen[screenX/rowLenght][screenX%rowLenght] = '.';
+                }
+                screenX = screenX + 1;
+            }
+            if ("noop".equals(step)) {
+            } else {
+                X = X + Integer.parseInt(step.split(" ")[1]);
+            }
+        }
+        for(int i = 0;i<screen.length;i++) {
+            for(int j = 0;j<screen[i].length;j++) {
+                System.out.print(screen[i][j]);
+            }
+            System.out.println();
+        }
+
+        
+
+
     }
     @Before
     public void init() throws IOException {
