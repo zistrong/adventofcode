@@ -53,6 +53,7 @@ public class Day1 {
                         firstNumber = String.valueOf(c);
                     }
                     lastNumber = String.valueOf(c);
+                    continue;
                 }
                 for (int i1 = 0; i1 < this.map.size(); i1++) {
                     String n = this.map.get(i1);
