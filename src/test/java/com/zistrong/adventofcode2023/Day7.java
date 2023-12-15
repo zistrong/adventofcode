@@ -14,6 +14,8 @@ import java.util.List;
 public class Day7 {
 
 
+    public static final char CHAR_J = 'J';
+
     private static class Node implements Comparable<Node> {
 
         public Node(String label, int strength, int part) {
@@ -23,13 +25,13 @@ public class Day7 {
             this.label = label;
             this.part = part;
             if (this.part == 2) {
-                this.intLabel();
+                this.initLabel();
             }
             this.initType();
         }
 
-        private void intLabel() {
-            int[] c = this.originalLabel.chars().filter(item -> item != 'J').distinct().toArray();
+        private void initLabel() {
+            int[] c = this.originalLabel.chars().filter(item -> item != CHAR_J).distinct().toArray();
             if (c.length == 0) {
                 return;
             }
@@ -42,7 +44,7 @@ public class Day7 {
                     max = count;
                 }
             }
-            this.label = originalLabel.replace("J", String.valueOf((char) maxC));
+            this.label = originalLabel.replace(String.valueOf(CHAR_J), String.valueOf((char) maxC));
         }
 
         private void initType() {
@@ -80,10 +82,10 @@ public class Day7 {
                     char current = this.originalLabel.charAt(i);
                     char other = o.originalLabel.charAt(i);
                     if (this.part == 2) {
-                        if (current == 'J' && other != 'J') {
+                        if (current == CHAR_J && other != CHAR_J) {
                             return -1;
                         }
-                        if (current != 'J' && other == 'J') {
+                        if (current != CHAR_J && other == CHAR_J) {
                             return 1;
                         }
                     }
@@ -124,14 +126,14 @@ public class Day7 {
                 case 'A' -> 14;
                 case 'K' -> 13;
                 case 'Q' -> 12;
-                case 'J' -> 11;
+                case CHAR_J -> 11;
                 case 'T' -> 10;
                 default -> 0;
             };
         }
 
         private boolean isFiveOfKind() {
-            return this.label.substring(1).chars().allMatch(item -> item == this.label.charAt(0));
+            return this.label.chars().distinct().count() == 1;
         }
 
         private boolean isFourKind() {
