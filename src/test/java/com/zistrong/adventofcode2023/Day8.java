@@ -61,9 +61,6 @@ public class Day8 {
         for (int i = 2; i < contents.size(); i++) {
             String content = contents.get(i);
             String location = content.split("=")[0].trim();
-            if (location.endsWith("A") || location.endsWith("Z")) {
-                System.out.println(location);
-            }
             String d = content.split("=")[1].trim().replace(" ", "").replace("(", "").replace(")", "");
             Node node = new Node(d.split(",")[0].trim(), d.split(",")[1].trim());
             map.put(location, node);
