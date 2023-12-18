@@ -6,10 +6,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Day8 {
 
@@ -151,30 +148,43 @@ public class Day8 {
             Node node = new Node(d.split(",")[0].trim(), d.split(",")[1].trim());
             map.put(location, node);
         }
-        int count = startANodes.size();
 
-        String location = "AAA";
-        int step = 0;
-        int insLength = instructions.length();
-        while (startANodes.stream().filter(item -> item.endsWith("Z")).count() != count) {
-            char instruction = instructions.charAt(step % insLength);
-
-            List<String> list = new ArrayList<>();
-            for (String startANode : startANodes) {
+        List<Long> numbers = new ArrayList<>();
+        long insLength = instructions.length();
+        for (String startANode : startANodes) {
+            long step = 0;
+            while (!startANode.endsWith("Z")) {
                 Node node = map.get(startANode);
-
+                char instruction = instructions.charAt((int) (step % insLength));
                 if (instruction == 'L') {
-                    location = node.left;
+                    startANode = node.left;
                 } else {
-                    location = node.right;
+                    startANode = node.right;
                 }
-                list.add(location);
+                step++;
             }
-            startANodes = list;
-
-            step++;
+            numbers.add(step);
         }
-        Assert.assertEquals(22411, step);
 
+        long minmul = 1;
+        for (long i : numbers) {
+            minmul = minmul * i / gcd(minmul, i);
+        }
+        Assert.assertEquals(11188774513823L, minmul);
+    }
+
+    long gcd(long a, long b) {
+        long temp;
+        if (a < b) {
+            temp = a;
+            a = b;
+            b = temp;
+        }
+        while (b != 0) {
+            temp = a % b;
+            a = b;
+            b = temp;
+        }
+        return a;
     }
 }
