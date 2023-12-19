@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -163,25 +164,10 @@ public class Day8 {
             numbers.add(step);
         }
 
-        long minmul = 1;
+        BigInteger minmul = BigInteger.ONE;
         for (long i : numbers) {
-            minmul = minmul * i / gcd(minmul, i);
+            minmul = minmul.multiply(BigInteger.valueOf(i)).divide(minmul.gcd(BigInteger.valueOf(i)));
         }
-        Assert.assertEquals(11188774513823L, minmul);
-    }
-
-    long gcd(long a, long b) {
-        long temp;
-        if (a < b) {
-            temp = a;
-            a = b;
-            b = temp;
-        }
-        while (b != 0) {
-            temp = a % b;
-            a = b;
-            b = temp;
-        }
-        return a;
+        Assert.assertEquals(11188774513823L, minmul.longValue());
     }
 }

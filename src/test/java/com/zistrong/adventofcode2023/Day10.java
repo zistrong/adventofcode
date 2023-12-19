@@ -1,5 +1,7 @@
 package com.zistrong.adventofcode2023;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -9,7 +11,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Day10 {
+    char CHAR_F = 'F';
+    char CHAR_J = 'J';
+    char CHAR_V = '|';
+    char CHAR_H = '-';
+    char CHAR_L = 'L';
+    char CHAR_7 = '7';
+    char CHAR_S = 'S';
+    char CHAR_DOT = '.';
+    Node sNode;
 
+    List<List<Node>> nodeList;
+
+
+    @Before
+    public void init() throws IOException {
+        int startX = 0, startY = 0;
+        List<String> contents = Files.readAllLines(Path.of("./src/test/resources/2023/", "day10.input"));
+        nodeList = new ArrayList<>();
+        int j = 0;
+        for (String content : contents) {
+            List<Node> list = new ArrayList<>();
+            for (int i = 0; i < content.length(); i++) {
+                char c = content.charAt(i);
+                Node node = new Node();
+                node.x = j;
+                node.y = i;
+                list.add(node);
+                node.c = c;
+                if (c == CHAR_S) {
+                    node.start = true;
+                    node.visit = true;
+                    startX = j;
+                    startY = i;
+                } else if (c == CHAR_DOT) {
+                    node.point = true;
+                } else if (c == CHAR_F) {
+                    node.e = true;
+                    node.s = true;
+                } else if (c == CHAR_J) {
+                    node.n = true;
+                    node.w = true;
+                } else if (c == CHAR_L) {
+                    node.n = true;
+                    node.e = true;
+                } else if (c == CHAR_7) {
+                    node.s = true;
+                    node.w = true;
+                } else if (c == CHAR_V) {
+                    node.s = true;
+                    node.n = true;
+                } else if (c == CHAR_H) {
+                    node.w = true;
+                    node.e = true;
+                }
+            }
+            nodeList.add(list);
+            j++;
+        }
+
+
+        sNode = nodeList.get(startX).get(startY);
+
+    }
 
     /**
      * You use the hang glider to ride the hot air from Desert Island all the way up to the floating metal island.
@@ -118,60 +182,166 @@ public class Day10 {
      * Find the single giant loop starting at S. How many steps along the loop does it take to get from the starting
      * position to the point farthest from the starting position?
      */
-
-    char CHAR_F = 'F';
-    char CHAR_J = 'J';
-    char CHAR_V = '|';
-    char CHAR_H = '-';
-    char CHAR_L = 'L';
-    char CHAR_7 = '7';
-    char CHAR_S = 'S';
-    char CHAR_DOT = '.';
-
-
     @Test
     public void part1() throws IOException {
 
-        List<String> contents = Files.readAllLines(Path.of("./src/test/resources/2023/", "day10.input"));
-        List<List<Node>> nodeList = new ArrayList<>();
-        for (String content : contents) {
-            List<Node> list = new ArrayList<>();
-            for (int i = 0; i < content.length(); i++) {
-                char c = content.charAt(i);
-                Node node = new Node();
-                list.add(node);
-                node.c = c;
-                if (c == CHAR_S) {
-                    node.start = true;
-                } else if (c == CHAR_DOT) {
-                    node.point = true;
-                } else if (c == CHAR_F) {
-                    node.e = true;
-                    node.s = true;
-                } else if (c == CHAR_J) {
-                    node.n = true;
-                    node.w = true;
-                } else if (c == CHAR_L) {
-                    node.n = true;
-                    node.e = true;
-                } else if (c == CHAR_7) {
-                    node.s = true;
-                    node.w = true;
-                } else if (c == CHAR_V) {
-                    node.s = true;
-                    node.n = true;
-                } else if (c == CHAR_H) {
-                    node.w = true;
-                    node.e = true;
-                }
-            }
-            nodeList.add(list);
+
+        int maxStep = getMaxPath(getNextNode(sNode));
+        Assert.assertEquals(6927, maxStep / 2);
+
+    }
+
+
+    private int getMaxPath(Node startNode) {
+        int step = 1;
+        while (startNode != null) {
+            step++;
+            startNode.visit = true;
+            startNode = getNextNode(startNode);
         }
-        System.out.println(nodeList);
+        return step;
+    }
+
+
+    private Node getNextNode(Node sNode) {
+        int maxX = nodeList.size(), maxY = nodeList.get(0).size();
+
+        //check west
+        if (sNode.y != 0) {
+            Node current = nodeList.get(sNode.x).get(sNode.y - 1);
+            if (!current.point && current.e && (sNode.w || sNode.start) && !current.start && !current.visit) {
+                return current;
+            }
+        }
+        // check east node
+        if (sNode.y != maxY - 1) {
+            Node current = nodeList.get(sNode.x).get(sNode.y + 1);
+            if (!current.point && current.w && (sNode.e || sNode.start) && !current.start && !current.visit) {
+                return current;
+
+            }
+        }
+
+        // check north node
+        if (sNode.x != 0) {
+            Node current = nodeList.get(sNode.x - 1).get(sNode.y);
+            if (!current.point && current.s && (sNode.n || sNode.start) && !current.start && !current.visit) {
+                return current;
+            }
+        }
+        // check south node
+        if (sNode.x != maxX - 1) {
+            Node current = nodeList.get(sNode.x + 1).get(sNode.y);
+            if (!current.point && current.n && (sNode.s || sNode.start) && !current.start && !current.visit) {
+                return current;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * You quickly reach the farthest point of the loop, but the animal never emerges. Maybe its nest is within the area enclosed by the loop?
+     * <p>
+     * To determine whether it's even worth taking the time to search for such a nest, you should calculate how many tiles are contained within the loop. For example:
+     * <p>
+     * ...........
+     * .S-------7.
+     * .|F-----7|.
+     * .||.....||.
+     * .||.....||.
+     * .|L-7.F-J|.
+     * .|..|.|..|.
+     * .L--J.L--J.
+     * ...........
+     * The above loop encloses merely four tiles - the two pairs of . in the southwest and southeast (marked I below).
+     * The middle . tiles (marked O below) are not in the loop. Here is the same loop again with those regions marked:
+     * <p>
+     * ...........
+     * .S-------7.
+     * .|F-----7|.
+     * .||OOOOO||.
+     * .||OOOOO||.
+     * .|L-7OF-J|.
+     * .|II|O|II|.
+     * .L--JOL--J.
+     * .....O.....
+     * In fact, there doesn't even need to be a full tile path to the outside for tiles to count as outside the loop - squeezing between pipes is also allowed!
+     * Here, I is still within the loop and O is still outside the loop:
+     * <p>
+     * ..........
+     * .S------7.
+     * .|F----7|.
+     * .||OOOO||.
+     * .||OOOO||.
+     * .|L-7F-J|.
+     * .|II||II|.
+     * .L--JL--J.
+     * ..........
+     * In both of the above examples, 4 tiles are enclosed by the loop.
+     * <p>
+     * Here's a larger example:
+     * <p>
+     * .F----7F7F7F7F-7....
+     * .|F--7||||||||FJ....
+     * .||.FJ||||||||L7....
+     * FJL7L7LJLJ||LJ.L-7..
+     * L--J.L7...LJS7F-7L7.
+     * ....F-J..F7FJ|L7L7L7
+     * ....L7.F7||L7|.L7L7|
+     * .....|FJLJ|FJ|F7|.LJ
+     * ....FJL-7.||.||||...
+     * ....L---J.LJ.LJLJ...
+     * The above sketch has many random bits of ground, some of which are in the loop (I) and some of which are outside it (O):
+     * <p>
+     * OF----7F7F7F7F-7OOOO
+     * O|F--7||||||||FJOOOO
+     * O||OFJ||||||||L7OOOO
+     * FJL7L7LJLJ||LJIL-7OO
+     * L--JOL7IIILJS7F-7L7O
+     * OOOOF-JIIF7FJ|L7L7L7
+     * OOOOL7IF7||L7|IL7L7|
+     * OOOOO|FJLJ|FJ|F7|OLJ
+     * OOOOFJL-7O||O||||OOO
+     * OOOOL---JOLJOLJLJOOO
+     * In this larger example, 8 tiles are enclosed by the loop.
+     * <p>
+     * Any tile that isn't part of the main loop can count as being enclosed by the loop.
+     * Here's another example with many bits of junk pipe lying around that aren't connected to the main loop at all:
+     * <p>
+     * FF7FSF7F7F7F7F7F---7
+     * L|LJ||||||||||||F--J
+     * FL-7LJLJ||||||LJL-77
+     * F--JF--7||LJLJ7F7FJ-
+     * L---JF-JLJ.||-FJLJJ7
+     * |F|F-JF---7F7-L7L|7|
+     * |FFJF7L7F-JF7|JL---7
+     * 7-L-JL7||F7|L7F-7F7|
+     * L.L7LFJ|||||FJL7||LJ
+     * L7JLJL-JLJLJL--JLJ.L
+     * Here are just the tiles that are enclosed by the loop marked with I:
+     * <p>
+     * FF7FSF7F7F7F7F7F---7
+     * L|LJ||||||||||||F--J
+     * FL-7LJLJ||||||LJL-77
+     * F--JF--7||LJLJIF7FJ-
+     * L---JF-JLJIIIIFJLJJ7
+     * |F|F-JF---7IIIL7L|7|
+     * |FFJF7L7F-JF7IIL---7
+     * 7-L-JL7||F7|L7F-7F7|
+     * L.L7LFJ|||||FJL7||LJ
+     * L7JLJL-JLJLJL--JLJ.L
+     * In this last example, 10 tiles are enclosed by the loop.
+     * <p>
+     * Figure out whether you have time to search for the nest by calculating the area within the loop. How many tiles are enclosed by the loop?
+     */
+    @Test
+    public void part2() {
 
     }
 
     private static class Node {
+        int x;
+        int y;
         char c;
         boolean point;
         boolean n;
@@ -181,4 +351,6 @@ public class Day10 {
         boolean start;
         boolean visit;
     }
+
+
 }
