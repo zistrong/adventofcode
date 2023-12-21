@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Day10 {
+
+
+    List<List<Node>> nodeList;
+
     char CHAR_F = 'F';
     char CHAR_J = 'J';
     char CHAR_V = '|';
@@ -20,9 +24,6 @@ public class Day10 {
     char CHAR_S = 'S';
     char CHAR_DOT = '.';
     Node sNode;
-
-    List<List<Node>> nodeList;
-
 
     @Before
     public void init() throws IOException {
@@ -188,9 +189,7 @@ public class Day10 {
 
         int maxStep = getMaxPath(getNextNode(sNode));
         Assert.assertEquals(6927, maxStep / 2);
-
     }
-
 
     private int getMaxPath(Node startNode) {
         int step = 1;
@@ -204,9 +203,8 @@ public class Day10 {
 
 
     private Node getNextNode(Node sNode) {
-        int maxX = nodeList.size(), maxY = nodeList.get(0).size();
-
-        //check west
+        int maxX = nodeList.size();
+        // check west
         if (sNode.y != 0) {
             Node current = nodeList.get(sNode.x).get(sNode.y - 1);
             if (!current.point && current.e && (sNode.w || sNode.start) && !current.start && !current.visit) {
@@ -214,11 +212,10 @@ public class Day10 {
             }
         }
         // check east node
-        if (sNode.y != maxY - 1) {
+        if (sNode.y != nodeList.get(sNode.x).size() - 1) {
             Node current = nodeList.get(sNode.x).get(sNode.y + 1);
             if (!current.point && current.w && (sNode.e || sNode.start) && !current.start && !current.visit) {
                 return current;
-
             }
         }
 
@@ -253,8 +250,7 @@ public class Day10 {
      * .|..|.|..|.
      * .L--J.L--J.
      * ...........
-     * The above loop encloses merely four tiles - the two pairs of . in the southwest and southeast (marked I below).
-     * The middle . tiles (marked O below) are not in the loop. Here is the same loop again with those regions marked:
+     * The above loop encloses merely four tiles - the two pairs of . in the southwest and southeast (marked I below). The middle . tiles (marked O below) are not in the loop. Here is the same loop again with those regions marked:
      * <p>
      * ...........
      * .S-------7.
@@ -265,8 +261,7 @@ public class Day10 {
      * .|II|O|II|.
      * .L--JOL--J.
      * .....O.....
-     * In fact, there doesn't even need to be a full tile path to the outside for tiles to count as outside the loop - squeezing between pipes is also allowed!
-     * Here, I is still within the loop and O is still outside the loop:
+     * In fact, there doesn't even need to be a full tile path to the outside for tiles to count as outside the loop - squeezing between pipes is also allowed! Here, I is still within the loop and O is still outside the loop:
      * <p>
      * ..........
      * .S------7.
@@ -305,8 +300,7 @@ public class Day10 {
      * OOOOL---JOLJOLJLJOOO
      * In this larger example, 8 tiles are enclosed by the loop.
      * <p>
-     * Any tile that isn't part of the main loop can count as being enclosed by the loop.
-     * Here's another example with many bits of junk pipe lying around that aren't connected to the main loop at all:
+     * Any tile that isn't part of the main loop can count as being enclosed by the loop. Here's another example with many bits of junk pipe lying around that aren't connected to the main loop at all:
      * <p>
      * FF7FSF7F7F7F7F7F---7
      * L|LJ||||||||||||F--J
@@ -335,8 +329,45 @@ public class Day10 {
      * Figure out whether you have time to search for the nest by calculating the area within the loop. How many tiles are enclosed by the loop?
      */
     @Test
-    public void part2() {
+    public void part2() throws IOException {
 
+        part1();
+        // 原理， 对于单连通的封闭曲线， 某点不在曲线包围的范围内的充分条件是： 对于任意从这个点的射线， 与曲线的交点为偶数（不包含切点）
+        // 对于这个问题， 斜向的射线可以解决这个问题， 切点就是拐点，比如7, L, F, J节点
+        // 注意S, 需要根据S的方向， 替换成7, L, F, J, 这里只检测左上， 所以只需要替换成L或者7
+        if (sNode.x > 0 && sNode.y < nodeList.get(sNode.x).size() - 1
+                && nodeList.get(sNode.x - 1).get(sNode.y).s
+                && nodeList.get(sNode.x).get(sNode.y + 1).w) {
+            sNode.c = CHAR_L;
+        }
+        if (sNode.y > 0 && sNode.x < nodeList.size() - 1
+                && nodeList.get(sNode.x + 1).get(sNode.y).n
+                && nodeList.get(sNode.x).get(sNode.y - 1).e) {
+            sNode.c = CHAR_7;
+        }
+        long count = 0L;
+        for (List<Node> list : this.nodeList) {
+            for (Node node : list) {
+                if (!node.visit) {
+                    // check left-top
+                    int x = node.x;
+                    int y = node.y;
+                    int c = 0;// count cross point
+                    while (x >= 0 && y >= 0) {
+                        // 交点
+                        if (nodeList.get(x).get(y).visit && !(nodeList.get(x).get(y).c == CHAR_7 || nodeList.get(x).get(y).c == CHAR_L)) {
+                            c++;
+                        }
+                        x--;
+                        y--;
+                    }
+                    if (c % 2 != 0) {
+                        count++;
+                    }
+                }
+            }
+        }
+        Assert.assertEquals(467L, count);
     }
 
     private static class Node {
