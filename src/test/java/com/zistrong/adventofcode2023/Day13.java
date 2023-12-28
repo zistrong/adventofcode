@@ -1,13 +1,14 @@
 package com.zistrong.adventofcode2023;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Day13 {
 
@@ -92,44 +93,155 @@ public class Day13 {
     public void part1() throws IOException {
 
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(new File("./src/test/resources/2023/day13.input")))
-        ) {
+        int sum = 0;
+        try (BufferedReader reader = new BufferedReader(new FileReader("./src/test/resources/2023/day13.input"))) {
             String line = reader.readLine();
-            boolean groupDone = false;
-            int sum = 0;
-            int firstNumber = 0;
-            int secondNumber = 0;
-
             List<String> currentMirror = new ArrayList<>();
-            boolean flag = true;
             while (line != null) {
                 if (line.isEmpty()) {
-                    sum += getScore(currentMirror, flag);
-                    flag = !flag;
+                    sum += getScore(currentMirror);
+                    currentMirror.clear();
                     line = reader.readLine();
                     continue;
                 }
                 currentMirror.add(line);
                 line = reader.readLine();
             }
-            sum += getScore(currentMirror, flag);
-            System.out.println(sum);
+            sum += getScore(currentMirror);
         }
+        Assert.assertEquals(31739, sum);
     }
 
-    List<String> contents;
 
-    private int getScore(List<String> currentMirror, boolean flag) {
-        if (flag) {
-            System.out.println("ve" + currentMirror);
-        } else {
-            System.out.println("ho" + currentMirror);
+    private int getReflectIndex(List<String> currentMirror) {
+        int index = 0;
 
+        for (int i = 0; i < currentMirror.size() - 1; i++) {
+            int t = 0;
+            int b = currentMirror.size() - 2 - i;
+            boolean flag = false;
+            while (b - t >= 1) {
+                if (!Objects.equals(currentMirror.get(t), currentMirror.get(b))) {
+                    break;
+                }
+                if (b - t == 1) {
+                    flag = true;
+                    break;
+                }
+                t++;
+                b--;
+            }
+            if (flag) {
+                index = b;
+                break;
+            }
         }
-        currentMirror.clear();
 
+        for (int i = currentMirror.size() - 1; i > 0; i--) {
 
-        return 0;
+            int b = currentMirror.size() - 1;
+            int t = currentMirror.size() - i;
+            boolean flag = false;
+            while (b - t >= 1) {
+
+                if (!Objects.equals(currentMirror.get(t), currentMirror.get(b))) {
+                    break;
+                }
+                if (b - t == 1) {
+                    flag = true;
+                    break;
+                }
+                t++;
+                b--;
+            }
+            if (flag) {
+                index = Math.max(index, b);
+                break;
+            }
+        }
+        return index;
+    }
+
+    private int getScore(List<String> currentMirror) {
+        int h = getReflectIndex(currentMirror);
+        if (h > 0) {
+            return h * 100;
+        }
+
+        List<String> rotate = new ArrayList<>();
+        for (int i = 0; i < currentMirror.get(0).length(); i++) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String s : currentMirror) {
+                stringBuilder.append(s.charAt(i));
+            }
+            rotate.add(stringBuilder.toString());
+        }
+
+        return getReflectIndex(rotate);
+
+    }
+
+    /**
+     * You resume walking through the valley of mirrors and - SMACK! - run directly into one. Hopefully nobody was watching,
+     * because that must have been pretty embarrassing.
+     * <p>
+     * Upon closer inspection, you discover that every mirror has exactly one smudge: exactly one . or # should be the opposite type.
+     * <p>
+     * In each pattern, you'll need to locate and fix the smudge that causes a different reflection line to be valid.
+     * (The old reflection line won't necessarily continue being valid after the smudge is fixed.)
+     * <p>
+     * Here's the above example again:
+     * <p>
+     * #.##..##.
+     * ..#.##.#.
+     * ##......#
+     * ##......#
+     * ..#.##.#.
+     * ..##..##.
+     * #.#.##.#.
+     * <p>
+     * #...##..#
+     * #....#..#
+     * ..##..###
+     * #####.##.
+     * #####.##.
+     * ..##..###
+     * #....#..#
+     * The first pattern's smudge is in the top-left corner. If the top-left # were instead .,
+     * it would have a different, horizontal line of reflection:
+     * <p>
+     * 1 ..##..##. 1
+     * 2 ..#.##.#. 2
+     * 3v##......#v3
+     * 4^##......#^4
+     * 5 ..#.##.#. 5
+     * 6 ..##..##. 6
+     * 7 #.#.##.#. 7
+     * With the smudge in the top-left corner repaired, a new horizontal line of reflection between rows 3 and 4 now exists.
+     * Row 7 has no corresponding reflected row and can be ignored, but every other row matches exactly: row 1 matches row 6,
+     * row 2 matches row 5, and row 3 matches row 4.
+     * <p>
+     * In the second pattern, the smudge can be fixed by changing the fifth symbol on row 2 from . to #:
+     * <p>
+     * 1v#...##..#v1
+     * 2^#...##..#^2
+     * 3 ..##..### 3
+     * 4 #####.##. 4
+     * 5 #####.##. 5
+     * 6 ..##..### 6
+     * 7 #....#..# 7
+     * Now, the pattern has a different horizontal line of reflection between rows 1 and 2.
+     * <p>
+     * Summarize your notes as before, but instead use the new different reflection lines. In this example,
+     * the first pattern's new horizontal line has 3 rows above it and the second pattern's new horizontal line has 1 row above it,
+     * summarizing to the value 400.
+     * <p>
+     * In each pattern, fix the smudge and find the different line of reflection.
+     * What number do you get after summarizing the new reflection line in each pattern in your notes?
+     */
+    @Test
+    public void part2() {
+
     }
 
 }
