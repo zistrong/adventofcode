@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Day13 {
 
@@ -89,39 +90,59 @@ public class Day13 {
      * <p>  10*4+5;
      * Find the line of reflection in each of the patterns in your notes. What number do you get after summarizing all of your notes?
      */
-    @Test
     public void part1() throws IOException {
-
-
-        int sum = 0;
-        try (BufferedReader reader = new BufferedReader(new FileReader("./src/test/resources/2023/day13.input"))) {
-            String line = reader.readLine();
-            List<String> currentMirror = new ArrayList<>();
-            while (line != null) {
-                if (line.isEmpty()) {
-                    sum += getScore(currentMirror);
-                    currentMirror.clear();
-                    line = reader.readLine();
-                    continue;
-                }
-                currentMirror.add(line);
-                line = reader.readLine();
-            }
-            sum += getScore(currentMirror);
-        }
-        Assert.assertEquals(31739, sum);
+        // empty
     }
 
 
-    private int getReflectIndex(List<String> currentMirror) {
-        int index = 0;
+    /**
+     * get new node
+     */
+    private Node getSmudgeNode(NodePair pair, Node node) {
+        if (pair.v.size() > 1) {
+            Node v = pair.v.get(0);
+            if (v.score != node.score) {
+                return v;
+            } else {
+                return pair.v.get(1);
+            }
+        }
+        if (pair.h.size() > 1) {
+            Node h = pair.h.get(0);
+            if (h.score != node.score) {
+                return h;
+            } else {
+                return pair.h.get(1);
+            }
+        }
+        if (pair.v.get(0).score != 0 && pair.v.get(0).score != node.score) {// compare score
+            return pair.v.get(0);
+        }
+        if (pair.h.get(0).score != 0 && pair.h.get(0).score != node.score) {// compare score
+            return pair.h.get(0);
+        }
+        return new Node(false, 0, 0);
 
+    }
+
+    /**
+     * must exist, get bigger score node
+     */
+    private Node getRealNode(NodePair nodePair) {
+        return nodePair.h.get(0).score > nodePair.v.get(0).score ? nodePair.h.get(0) : nodePair.v.get(0);
+    }
+
+
+    private List<Node> getReflectIndex(List<StringBuilder> currentMirror) {
+        int index = 0;
+        List<Node> list = new ArrayList<>();
+        // match from top
         for (int i = 0; i < currentMirror.size() - 1; i++) {
             int t = 0;
             int b = currentMirror.size() - 2 - i;
             boolean flag = false;
             while (b - t >= 1) {
-                if (!Objects.equals(currentMirror.get(t), currentMirror.get(b))) {
+                if (!Objects.equals(currentMirror.get(t).toString(), currentMirror.get(b).toString())) {
                     break;
                 }
                 if (b - t == 1) {
@@ -137,14 +158,16 @@ public class Day13 {
             }
         }
 
+        if (index != 0) {
+            list.add(new Node(false, index, index));
+        }
+        // match from bottom
         for (int i = currentMirror.size() - 1; i > 0; i--) {
-
             int b = currentMirror.size() - 1;
             int t = currentMirror.size() - i;
             boolean flag = false;
             while (b - t >= 1) {
-
-                if (!Objects.equals(currentMirror.get(t), currentMirror.get(b))) {
+                if (!Objects.equals(currentMirror.get(t).toString(), currentMirror.get(b).toString())) {
                     break;
                 }
                 if (b - t == 1) {
@@ -155,31 +178,44 @@ public class Day13 {
                 b--;
             }
             if (flag) {
-                index = Math.max(index, b);
+                index = b;
                 break;
             }
         }
-        return index;
+        if (!list.isEmpty() && list.get(0).index != index) {
+            list.add(new Node(false, index, index));
+        }
+        if (list.isEmpty()) {
+            list.add(new Node(false, index, index));
+        }
+        return list;
+
     }
 
-    private int getScore(List<String> currentMirror) {
-        int h = getReflectIndex(currentMirror);
-        if (h > 0) {
-            return h * 100;
-        }
-
-        List<String> rotate = new ArrayList<>();
+    private NodePair getScore(List<StringBuilder> currentMirror) {
+        List<Node> h = getReflectIndex(currentMirror);
+        List<Node> list = h.stream().map(item -> new Node(true, item.index, item.score() * 100)).collect(Collectors.toList());
+        List<StringBuilder> rotate = new ArrayList<>();
         for (int i = 0; i < currentMirror.get(0).length(); i++) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (String s : currentMirror) {
+            for (StringBuilder s : currentMirror) {
                 stringBuilder.append(s.charAt(i));
             }
-            rotate.add(stringBuilder.toString());
+            rotate.add(stringBuilder);
         }
-
-        return getReflectIndex(rotate);
+        return new NodePair(list, getReflectIndex(rotate));
 
     }
+
+    record Node(boolean direct, int index, int score) {
+    }
+
+    record NodePair(List<Node> h, List<Node> v) {
+    }
+
+    private static final char DOT = '.';
+    private static final char SHARP = '#';
+
 
     /**
      * You resume walking through the valley of mirrors and - SMACK! - run directly into one. Hopefully nobody was watching,
@@ -240,8 +276,54 @@ public class Day13 {
      * What number do you get after summarizing the new reflection line in each pattern in your notes?
      */
     @Test
-    public void part2() {
+    public void part2() throws IOException {
+
+        int sumPart2 = 0;
+        int sumPart1 = 0;
+        try (BufferedReader reader = new BufferedReader(new FileReader("./src/test/resources/2023/day13.input"))) {
+            String line = reader.readLine();
+            List<StringBuilder> currentMirror = new ArrayList<>();
+            while (line != null) {
+                if (line.isEmpty()) {
+                    Node node = getRealNode(getScore(currentMirror));
+                    sumPart1 += node.score;
+                    sumPart2 += getSmudgeScore(currentMirror, node);
+                    currentMirror.clear();
+                    line = reader.readLine();
+                    continue;
+                }
+                currentMirror.add(new StringBuilder(line));
+                line = reader.readLine();
+            }
+            Node node = getRealNode(getScore(currentMirror));
+            sumPart1 += node.score;
+            sumPart2 += getSmudgeScore(currentMirror, node);
+        }
+        Assert.assertEquals(31739, sumPart1);
+        Assert.assertEquals(31539, sumPart2);
 
     }
 
+    private int getSmudgeScore(List<StringBuilder> currentMirror, Node node) {
+        for (int j = 0; j < currentMirror.size(); j++) {
+            StringBuilder stringBuilder = currentMirror.get(j);
+            for (int i = 0; i < stringBuilder.length(); i++) {
+                replaceChar(stringBuilder, i);
+                Node temp = getSmudgeNode(getScore(currentMirror), node);
+                if (temp.score != 0) {
+                    return temp.score;
+                }
+                replaceChar(stringBuilder, i);
+            }
+        }
+        return 0;
+    }
+
+    private void replaceChar(StringBuilder stringBuilder, int i) {
+        if (stringBuilder.charAt(i) == SHARP) {
+            stringBuilder.replace(i, i + 1, String.valueOf(DOT));
+        } else {
+            stringBuilder.replace(i, i + 1, String.valueOf(SHARP));
+        }
+    }
 }
