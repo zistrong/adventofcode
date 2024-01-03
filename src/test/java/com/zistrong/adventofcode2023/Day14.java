@@ -1,10 +1,14 @@
 package com.zistrong.adventofcode2023;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Day14 {
@@ -87,16 +91,13 @@ public class Day14 {
                 .stream().map(StringBuilder::new).toList();
 
 
-        east();
+        north();
         int length = contents.size();
         long sum = 0;
         for (int i = 0; i < contents.size(); i++) {
             sum += contents.get(i).toString().chars().filter(item -> item == O).count() * (length - i);
         }
-
-        System.out.println(sum);
-        //136 104 66 104
-        //Assert.assertEquals(108889L, sum);
+        Assert.assertEquals(108889L, sum);
     }
 
     private void round() {
@@ -257,23 +258,49 @@ public class Day14 {
     public void part2() throws IOException {
         contents = Files.readAllLines(Path.of("./src/test/resources/2023/", "day14.input"))
                 .stream().map(StringBuilder::new).toList();
-
-
-        int length = contents.size();
-        for (int i = 0; i < 1; i++) {
-            round();
-            long sum = 0;
-            for (int k = 0; k < contents.size(); k++) {
-                sum += contents.get(k).toString().chars().filter(item -> item == O).count() * (length - k);
-            }
-            System.out.println(sum);
+        StringBuilder stringBuilder = new StringBuilder();
+        round();//round 1
+        List<String> list = new ArrayList<>();
+        for (StringBuilder content : contents) {
+            stringBuilder.append(content);
         }
-        //print();
+        list.add(getMD5String(stringBuilder.toString()));
+
+
+        int k;
+        int size;
+        while (true) {
+            round();
+            stringBuilder = new StringBuilder();
+            for (StringBuilder content : contents) {
+                stringBuilder.append(content);
+            }
+            if (list.contains(getMD5String(stringBuilder.toString()))) {// if exist , break loop
+                size = list.size();
+                k = list.indexOf(getMD5String(stringBuilder.toString()));
+                break;
+            }
+            list.add(getMD5String(stringBuilder.toString()));
+        }
+        for (int i = 0; i < (1000000000 - k - 1) % (size - k); i++) {//get the correct loop
+            round();
+        }
+        int length = contents.size();
+        long sum = 0;
+        for (int m = 0; m < contents.size(); m++) {
+            sum += contents.get(m).toString().chars().filter(item -> item == O).count() * (length - m);
+        }
+        Assert.assertEquals(104671L, sum);
 
     }
-    private void print() {
-        for (StringBuilder content : contents) {
-            System.out.println(content);
+
+    public static String getMD5String(String str) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(str.getBytes());
+            return new BigInteger(1, md.digest()).toString(16);
+        } catch (Exception e) {
+            return null;
         }
     }
 }
