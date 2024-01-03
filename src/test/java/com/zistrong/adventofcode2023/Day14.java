@@ -89,15 +89,8 @@ public class Day14 {
 
         contents = Files.readAllLines(Path.of("./src/test/resources/2023/", "day14.input"))
                 .stream().map(StringBuilder::new).toList();
-
-
         north();
-        int length = contents.size();
-        long sum = 0;
-        for (int i = 0; i < contents.size(); i++) {
-            sum += contents.get(i).toString().chars().filter(item -> item == O).count() * (length - i);
-        }
-        Assert.assertEquals(108889L, sum);
+        Assert.assertEquals(108889L, getSum());
     }
 
     private void round() {
@@ -258,39 +251,26 @@ public class Day14 {
     public void part2() throws IOException {
         contents = Files.readAllLines(Path.of("./src/test/resources/2023/", "day14.input"))
                 .stream().map(StringBuilder::new).toList();
-        StringBuilder stringBuilder = new StringBuilder();
-        round();//round 1
         List<String> list = new ArrayList<>();
-        for (StringBuilder content : contents) {
-            stringBuilder.append(content);
-        }
-        list.add(getMD5String(stringBuilder.toString()));
-
-
         int k;
         int size;
         while (true) {
             round();
-            stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
             for (StringBuilder content : contents) {
                 stringBuilder.append(content);
             }
-            if (list.contains(getMD5String(stringBuilder.toString()))) {// if exist , break loop
+            if (list.contains(getMD5String(stringBuilder.toString()))) {// if exist , it means the round reach a cycle, break loop
                 size = list.size();
                 k = list.indexOf(getMD5String(stringBuilder.toString()));
                 break;
             }
             list.add(getMD5String(stringBuilder.toString()));
         }
-        for (int i = 0; i < (1000000000 - k - 1) % (size - k); i++) {//get the correct loop
+        for (int i = 0; i < (1000000000 - k - 1) % (size - k); i++) {// get the correct loop
             round();
         }
-        int length = contents.size();
-        long sum = 0;
-        for (int m = 0; m < contents.size(); m++) {
-            sum += contents.get(m).toString().chars().filter(item -> item == O).count() * (length - m);
-        }
-        Assert.assertEquals(104671L, sum);
+        Assert.assertEquals(104671L, getSum());
 
     }
 
@@ -302,5 +282,14 @@ public class Day14 {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public long getSum() {
+        int length = contents.size();
+        long sum = 0L;
+        for (int m = 0; m < length; m++) {
+            sum += contents.get(m).toString().chars().filter(item -> item == O).count() * (length - m);
+        }
+        return sum;
     }
 }
