@@ -7,7 +7,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Day16 {
     List<List<Node>> nodesList;
@@ -92,11 +95,10 @@ public class Day16 {
 
         Map<String, Beam> map = new HashMap<>();
         Beam startBeam = new Beam();
-        startBeam.direct = 'e';
+        startBeam.direction = 'e';
         startBeam.x = 0;
         startBeam.y = -1;
         startBeam.init = true;
-        startBeam.id = getId();
         map.put(startBeam.id, startBeam);
         this.visit(map);
         Assert.assertEquals(8389L, getScore(nodesList));
@@ -164,22 +166,18 @@ public class Day16 {
         Map<String, Beam> map = new HashMap<>();
         for (int i = 0; i < nodesList.size(); i++) {
             Beam startBeam = new Beam();
-            startBeam.direct = 'e';
+            startBeam.direction = 'e';
             startBeam.x = i;
             startBeam.y = -1;
             startBeam.init = true;
-            startBeam.id = getId();
             map.put(startBeam.id, startBeam);
             this.visit(map);
             maxScore = Math.max(maxScore, getScore(nodesList));
             this.rest();
 
-            startBeam = new Beam();
-            startBeam.direct = 'w';
-            startBeam.x = i;
+            startBeam.direction = 'w';
             startBeam.y = nodesList.get(0).size();
             startBeam.init = true;
-            startBeam.id = getId();
             map.put(startBeam.id, startBeam);
             this.visit(map);
             maxScore = Math.max(maxScore, getScore(nodesList));
@@ -187,22 +185,18 @@ public class Day16 {
         }
         for (int i = 0; i < nodesList.get(0).size(); i++) {
             Beam startBeam = new Beam();
-            startBeam.direct = 's';
+            startBeam.direction = 's';
             startBeam.x = -1;
             startBeam.y = i;
             startBeam.init = true;
-            startBeam.id = getId();
             map.put(startBeam.id, startBeam);
             this.visit(map);
             maxScore = Math.max(maxScore, getScore(nodesList));
             this.rest();
 
-            startBeam = new Beam();
-            startBeam.direct = 'n';
+            startBeam.direction = 'n';
             startBeam.x = nodesList.size();
-            startBeam.y = i;
             startBeam.init = true;
-            startBeam.id = getId();
             map.put(startBeam.id, startBeam);
             this.visit(map);
             maxScore = Math.max(maxScore, getScore(nodesList));
@@ -226,13 +220,13 @@ public class Day16 {
         while (!map.isEmpty()) {
             Beam current = map.values().stream().toList().get(0);
             while (true) {
-                if (current.direct == 'w') {
+                if (current.direction == 'w') {
                     current.y--;
-                } else if (current.direct == 'e') {
+                } else if (current.direction == 'e') {
                     current.y++;
-                } else if (current.direct == 'n') {
+                } else if (current.direction == 'n') {
                     current.x--;
-                } else if (current.direct == 's') {
+                } else if (current.direction == 's') {
                     current.x++;
                 }
                 if (isBlock(current)) {
@@ -243,66 +237,58 @@ public class Day16 {
                 node.visit++;
 
 
-                if ((current.direct == 'e' && node.c == '\\') || (current.direct == 'w' && node.c == '/')) {
+                if ((current.direction == 'e' && node.c == '\\') || (current.direction == 'w' && node.c == '/')) {
                     Beam newBean = current.clone();
-                    newBean.direct = 's';
-                    newBean.id = getId();
+                    newBean.direction = 's';
                     map.put(newBean.id, newBean);
                     break;
                 }
-                if ((current.direct == 'w' && node.c == '\\') || (current.direct == 'e' && node.c == '/')) {
+                if ((current.direction == 'w' && node.c == '\\') || (current.direction == 'e' && node.c == '/')) {
                     Beam newBean = current.clone();
-                    newBean.direct = 'n';
-                    newBean.id = getId();
+                    newBean.direction = 'n';
                     map.put(newBean.id, newBean);
                     break;
                 }
-                if ((current.direct == 'n' && node.c == '\\') || (current.direct == 's' && node.c == '/')) {
+                if ((current.direction == 'n' && node.c == '\\') || (current.direction == 's' && node.c == '/')) {
                     Beam newBean = current.clone();
-                    newBean.direct = 'w';
-                    newBean.id = getId();
+                    newBean.direction = 'w';
                     map.put(newBean.id, newBean);
                     break;
                 }
-                if ((current.direct == 'n' && node.c == '/') || (current.direct == 's' && node.c == '\\')) {
+                if ((current.direction == 'n' && node.c == '/') || (current.direction == 's' && node.c == '\\')) {
                     Beam newBean = current.clone();
-                    newBean.direct = 'e';
-                    newBean.id = getId();
+                    newBean.direction = 'e';
                     map.put(newBean.id, newBean);
                     break;
                 }
 
-                if ((current.direct == 'w' || current.direct == 'e') && node.c == '|') {
+                if ((current.direction == 'w' || current.direction == 'e') && node.c == '|') {
                     if (node.visit <= 1) {
                         Beam n = new Beam();
                         n.x = node.x;
                         n.y = node.y;
-                        n.direct = 'n';
-                        n.id = getId();
+                        n.direction = 'n';
                         map.put(n.id, n);
                         Beam s = new Beam();
                         s.x = node.x;
                         s.y = node.y;
-                        s.direct = 's';
-                        s.id = getId();
+                        s.direction = 's';
                         map.put(s.id, s);
                     }
                     break;
                 }
 
-                if ((current.direct == 's' || current.direct == 'n') && node.c == '-') {
+                if ((current.direction == 's' || current.direction == 'n') && node.c == '-') {
                     if (node.visit <= 1) {
                         Beam w = new Beam();
                         w.x = node.x;
                         w.y = node.y;
-                        w.direct = 'w';
-                        w.id = getId();
+                        w.direction = 'w';
                         map.put(w.id, w);
                         Beam e = new Beam();
                         e.x = node.x;
                         e.y = node.y;
-                        e.direct = 'e';
-                        e.id = getId();
+                        e.direction = 'e';
                         map.put(e.id, e);
                     }
                     break;
@@ -326,10 +312,6 @@ public class Day16 {
         return score;
     }
 
-    private String getId() {
-        return UUID.randomUUID().toString();
-    }
-
     private static class Node {
         int visit;
         char c;
@@ -338,7 +320,12 @@ public class Day16 {
     }
 
     private static class Beam implements Cloneable {
-        char direct;
+
+        public Beam() {
+            this.id = String.valueOf(Math.random());
+        }
+
+        char direction;
         int x;
         int y;
         String id;
@@ -347,7 +334,9 @@ public class Day16 {
         @Override
         public Beam clone() {
             try {
-                return (Beam) super.clone();
+                Beam clone = (Beam) super.clone();
+                clone.id = String.valueOf(Math.random());
+                return clone;
             } catch (CloneNotSupportedException e) {
                 throw new AssertionError();
             }
