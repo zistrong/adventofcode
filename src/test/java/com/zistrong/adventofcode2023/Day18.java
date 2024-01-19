@@ -149,6 +149,7 @@ public class Day18 {
         int r = 0;
 
 
+        long sum = 0L;
         for (String command : commands) {
             String[] s = command.split(" ");
             Command command1;
@@ -157,6 +158,7 @@ public class Day18 {
             command1 = new Command(c, Integer.parseInt(color.substring(0, color.length() - 1), 16), s[2]);
             // command1 = new Command(s[0].charAt(0), Integer.parseInt(s[1]), s[2]);
             commandList.add(command1);
+            sum+=command1.step;
         }
 
         int startX = 0;
@@ -217,7 +219,7 @@ public class Day18 {
             //      * <p>(1,1) (4,1) (4,3) (1,3)
             //      * 1*1+4*3+4*3+1*1-1*4-1*4-3*1-3*1
 
-            count += ((long) prev.x * command.y*-1 + (long) prev.y * command.x);
+            count += ((long) prev.x * command.y - (long) prev.y * command.x);
             //𝑨=𝑰+𝑩/𝟐−𝟏
 
             prev = command;
@@ -227,7 +229,7 @@ public class Day18 {
 
         //952408144115
         //6405262
-        System.out.println(count/2+1-6405262/2);
+        System.out.println(count/2+1-sum/2);
 
     }
 
