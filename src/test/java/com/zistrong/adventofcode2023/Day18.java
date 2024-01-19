@@ -5,13 +5,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Day18 {
 
@@ -143,11 +140,6 @@ public class Day18 {
     public void part2() throws IOException {
         List<String> commands = Files.readAllLines(Path.of("./src/test/resources/2023/", "day18.input"));
         List<Command> commandList = new ArrayList<>();
-        int u = 0;
-        int d = 0;
-        int l = 0;
-        int r = 0;
-
 
         long sum = 0L;
         for (String command : commands) {
@@ -156,21 +148,17 @@ public class Day18 {
             String color = s[2].replace("(", "").replace(")", "").replace("#", "");
             char c = color.charAt(color.length() - 1);
             command1 = new Command(c, Integer.parseInt(color.substring(0, color.length() - 1), 16), s[2]);
-            // command1 = new Command(s[0].charAt(0), Integer.parseInt(s[1]), s[2]);
             commandList.add(command1);
-            sum+=command1.step;
+            sum += command1.step;
         }
 
         int startX = 0;
         int startY = 0;
 
+        Command prev = commandList.get(commandList.size() - 1);
+        long count = 0L;
 
         // 0 means R, 1 means D, 2 means L, and 3 means U.
-        int minX = Integer.MAX_VALUE;
-        int minY = Integer.MAX_VALUE;
-        int maxX = Integer.MIN_VALUE;
-        int maxY = Integer.MIN_VALUE;
-        Command prev = commandList.get(commandList.size() - 1);
         for (int i = 0; i < commandList.size(); i++) {
             Command command = commandList.get(i);
             command.index = i;
@@ -185,122 +173,16 @@ public class Day18 {
             } else if (command.direction == '3') {
                 startX = startX - command.step;
             }
-
-            if ((prev.direction == '2' && command.direction == '3') ||
-                    (prev.direction == '1' && command.direction == '0') ||
-                    (prev.direction == '0' && command.direction == '1') ||
-                    (prev.direction == '3' && command.direction == '2')) {
-                command.isPoint = true;
-            }
-            prev = command;
-            if (startX < minX) {
-                minX = startX;
-            }
-            if (startY < minY) {
-                minY = startY;
-            }
-            if (startX > maxX) {
-                maxX = startX;
-            }
-            if (startY > maxY) {
-                maxY = startY;
-            }
-        }
-
-
-        Map<Integer, List<Line>> hMap = new HashMap<>();
-        Map<Integer, List<Line>> vMap = new HashMap<>();
-        long count = 0L;
-
-        prev = commandList.get(commandList.size() - 1);
-        for (int i = 0; i < commandList.size(); i++) {
-            Command command = commandList.get(i);
-            // 0.5∗((x1∗y2+x2∗y3+x3∗y1)−(y1∗x2+y2∗x3+y3∗x1))
-            //      * <p>(1,1) (4,1) (4,3) (1,3)
-            //      * 1*1+4*3+4*3+1*1-1*4-1*4-3*1-3*1
-
-            count += ((long) prev.x * command.y - (long) prev.y * command.x);
-            //𝑨=𝑰+𝑩/𝟐−𝟏
-
+            count += ((long) prev.x * command.y * -1 + (long) prev.y * command.x);
             prev = command;
 
-
         }
 
-        //952408144115
-        //6405262
-        System.out.println(count/2+1-sum/2);
+        // 952408144115
+        // 6405262
+        // 44644464596918
+        System.out.println(count / 2 + 1 + sum / 2);
 
-    }
-
-    private static class Line {
-
-        Command start;
-        Command end;
-
-        public Line(Command start, Command end) {
-            this.start = start;
-            this.end = end;
-        }
-    }
-
-    private boolean isInTwoLine2(int x, int y, Map<Integer, List<Line>> hMap, Map<Integer, List<Line>> vMap) {
-
-        // 0 means R, 1 means D, 2 means L, and 3 means U.
-
-        List<Line> list = hMap.get(x);
-
-        if (list != null) {
-            for (Line line : list) {
-                if (line.start.y <= y && line.end.y >= y) {
-                    return true;
-                }
-            }
-        }
-
-        list = vMap.get(y);
-
-        if (list != null) {
-            for (Line line : list) {
-                if (line.start.x <= x && line.end.x >= x) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isInTwoLine(int x, int y, List<Command> commandList) {
-
-        // 0 means R, 1 means D, 2 means L, and 3 means U.
-
-        Command pre = commandList.get(commandList.size() - 1);
-        for (Command command : commandList) {
-            if (pre.direction == '0') {
-                if (pre.x == x && pre.y <= y && command.y >= y) {
-                    return true;
-                }
-            } else if (pre.direction == '1') {
-
-                if (pre.y == y && pre.x <= x && command.x >= x) {
-                    return true;
-                }
-            } else if (pre.direction == '2') {
-
-                if (pre.x == x && pre.y >= y && command.y <= y) {
-                    return true;
-                }
-            } else if (pre.direction == '3') {
-
-                if (pre.y == y && pre.x >= x && command.x <= x) {
-                    return true;
-                }
-            }
-            pre = command;
-        }
-
-        return false;
     }
 
     private static class Cube {
@@ -308,7 +190,6 @@ public class Day18 {
         int y;
         char c = '.';
         char direct = 'S';// 7
-        boolean isPoint;
     }
 
     private static class Command {
@@ -317,7 +198,6 @@ public class Day18 {
         String color;
         int x;
         int y;
-        boolean isPoint;
         int index;
 
         public Command(char direction, int step, String color) {
@@ -464,34 +344,6 @@ public class Day18 {
             }
         }
         Assert.assertEquals(39039, count);
-    }
-
-
-    @Test
-    public void part3() {
-        /**
-         #70c710 = R 461937
-         #0dc571 = D 56407
-         #5713f0 = R 356671
-         #d2c081 = D 863240
-         #59c680 = R 367720
-         #411b91 = D 266681
-         #8ceee2 = L 577262
-         #caa173 = U 829975
-         #1b58a2 = L 112010
-         #caa171 = D 829975
-         #7807d2 = L 491645
-         #a77fa3 = U 686074
-         #015232 = L 5411
-         #7a21e3 = U 500254
-         */
-
-        BigInteger bigInteger = new BigInteger("461937");
-        BigInteger bigInteger1 = new BigInteger("500254");
-        System.out.println(bigInteger1.gcd(bigInteger));
-        System.out.println(bigInteger.multiply(bigInteger1).divide(bigInteger1.gcd(bigInteger)));
-
-
     }
 
 }
