@@ -76,4 +76,9 @@ public class Day19 {
         return "R";
     }
 
+    @Test
+    public void part2() {
+
+    }
+
 }
