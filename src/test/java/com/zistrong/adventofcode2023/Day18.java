@@ -1,7 +1,6 @@
 package com.zistrong.adventofcode2023;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,11 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Day18 {
-
-    @Before
-    public void init() {
-
-    }
 
 
     /**
@@ -83,25 +77,9 @@ public class Day18 {
      */
     @Test
     public void part1() throws IOException {
-        // #######
-        // #.....#
-        // ###...#
-        // ..#...#
-        // ..#...#
-        // ###.###
-        // #...#..
-        // ##..###
-        // .#....#
-        // .######
-        calculate(1);
+        calculate();
 
     }
-
-    record Node(int x, int y) {
-    }
-    // 0.5∗((x1∗y2+x2∗y3+x3∗y1)−(y1∗x2+y2∗x3+y3∗x1))
-    //      * <p>(1,1) (4,1) (4,3) (1,3)
-    //      * 1*1+4*3+4*3+1*1-1*4-1*4-3*1-3*1
 
     /**
      * The Elves were right to be concerned; the planned lagoon would be much too small.
@@ -133,56 +111,57 @@ public class Day18 {
      * 952408144115
      * Convert the hexadecimal color codes into the correct instructions; if the Elves follow this new dig plan,
      * how many cubic meters of lava could the lagoon hold?
-     *
-     * @throws IOException
      */
     @Test
     public void part2() throws IOException {
         List<String> commands = Files.readAllLines(Path.of("./src/test/resources/2023/", "day18.input"));
-        List<Command> commandList = new ArrayList<>();
 
-        long sum = 0L;
-        for (String command : commands) {
-            String[] s = command.split(" ");
-            Command command1;
-            String color = s[2].replace("(", "").replace(")", "").replace("#", "");
+        long s = 0L;
+        long startX = 0L;
+        long startY = 0L;
+        Command prev = null;
+        long S = 0L;
+
+        for (String commandLine : commands) {
+            String[] s1 = commandLine.split(" ");
+            String color = s1[2].replace("(", "").replace(")", "").replace("#", "");
             char c = color.charAt(color.length() - 1);
-            command1 = new Command(c, Integer.parseInt(color.substring(0, color.length() - 1), 16), s[2]);
-            commandList.add(command1);
-            sum += command1.step;
-        }
-
-        int startX = 0;
-        int startY = 0;
-
-        Command prev = commandList.get(commandList.size() - 1);
-        long count = 0L;
-
-        // 0 means R, 1 means D, 2 means L, and 3 means U.
-        for (int i = 0; i < commandList.size(); i++) {
-            Command command = commandList.get(i);
-            command.index = i;
+            Command command = new Command(c, Integer.parseInt(color.substring(0, color.length() - 1), 16));
+            s += command.step;
+            // 确定坐标
             command.x = startX;
             command.y = startY;
-            if (command.direction == '0') {
-                startY = command.step + startY;
-            } else if (command.direction == '1') {
-                startX = startX + command.step;
-            } else if (command.direction == '2') {
-                startY = startY - command.step;
-            } else if (command.direction == '3') {
-                startX = startX - command.step;
+            switch (command.direction) {
+                case '0':
+                    startY += command.step;
+                    break;
+                case '1':
+                    startX += command.step;
+                    break;
+                case '2':
+                    startY -= command.step;
+                    break;
+                case '3':
+                    startX -= command.step;
             }
-            count += ((long) prev.x * command.y * -1 + (long) prev.y * command.x);
+            // shoelace定理
+            // 对于有n个坐标(xi, yi)围成的多边形，其面积为
+            // S = (x1 * y2 + x2 * y3 +..+xn * y1 - y1 * x2 + y2 * x3...+yn * x1) / 2
+            // 其中(xi,yi)按照逆时针方向排列，如果顺时针则符号相反
+            if (prev != null) {
+                S += prev.y * command.x - prev.x * command.y;
+            }
             prev = command;
-
         }
+        S = S / 2;
 
-        // 952408144115
-        // 6405262
-        // 44644464596918
-        System.out.println(count / 2 + 1 + sum / 2);
-
+        // 皮克定理
+        // 给定顶点坐标均是整点（或正方形格点）的简单多边形，
+        // 皮克定理说明了其面积S和内部格点数目n、多边形边界上的格点数目s的关系：
+        // S = n + s/2 - 1
+        // n=S+1-s/2
+        // total = n+s = S + s/2 + 1
+        Assert.assertEquals(44644464596918L, S + s / 2 + 1);
     }
 
     private static class Cube {
@@ -195,19 +174,16 @@ public class Day18 {
     private static class Command {
         char direction;
         int step;
-        String color;
-        int x;
-        int y;
-        int index;
+        long x;
+        long y;
 
-        public Command(char direction, int step, String color) {
+        public Command(char direction, int step) {
             this.direction = direction;
             this.step = step;
-            this.color = color;
         }
     }
 
-    private void calculate(int part) throws IOException {
+    private void calculate() throws IOException {
         List<String> commands = Files.readAllLines(Path.of("./src/test/resources/2023/", "day18.input"));
         List<Command> commandList = new ArrayList<>();
         int u = 0;
@@ -218,32 +194,22 @@ public class Day18 {
 
         for (String command : commands) {
             String[] s = command.split(" ");
-            Command command1 = null;
-            if (part == 1) {
-                command1 = new Command(s[0].charAt(0), Integer.parseInt(s[1]), s[2]);
-            } else {
-                String color = s[2].replace("(", "").replace(")", "").replace("#", "");
-                char c = color.charAt(color.length() - 1);
-                char direct = 'U';
-                if (c == '0') {
-                    direct = 'R';
-                } else if (c == '1') {
-                    direct = 'D';
-                } else if (c == '2') {
-                    direct = 'L';
-                }
-                command1 = new Command(direct, Integer.parseInt(color.substring(0, color.length() - 1), 16), s[2]);
-            }
+            Command command1 = new Command(s[0].charAt(0), Integer.parseInt(s[1]));
+
             commandList.add(command1);
 
-            if (command1.direction == 'U') {
-                u += command1.step;
-            } else if (command1.direction == 'D') {
-                d += command1.step;
-            } else if (command1.direction == 'L') {
-                l += command1.step;
-            } else if (command1.direction == 'R') {
-                r += command1.step;
+            switch (command1.direction) {
+                case 'U':
+                    u += command1.step;
+                    break;
+                case 'D':
+                    d += command1.step;
+                    break;
+                case 'L':
+                    l += command1.step;
+                    break;
+                case 'R':
+                    r += command1.step;
             }
         }
 
