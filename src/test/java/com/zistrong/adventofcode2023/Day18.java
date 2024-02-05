@@ -144,7 +144,7 @@ public class Day18 {
                 case '3':
                     startX -= command.step;
             }
-            // shoelace定理
+            // shoelace定理 高斯面积公式
             // 对于有n个坐标(xi, yi)围成的多边形，其面积为
             // S = (x1 * y2 + x2 * y3 +..+xn * y1 - y1 * x2 + y2 * x3...+yn * x1) / 2
             // 其中(xi,yi)按照逆时针方向排列，如果顺时针则符号相反
