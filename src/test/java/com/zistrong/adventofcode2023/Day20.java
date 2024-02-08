@@ -5,7 +5,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Day20 {
 
@@ -57,6 +60,12 @@ public class Day20 {
      * acts like an inverter (it sends the opposite of the pulse type it receives); it outputs to a.
      * <p>
      * By pushing the button once, the following pulses are sent:
+     * <p>
+     * <p>
+     * % 只处理low purple   low off->on 发送 high ,  low on->off 发送low，如果收到high， 不处理。
+     * & 记住所有连接的发送的最新信号，默认为low，如果所有连接的信号都是high， 发送low, 否则发送high
+     * broadcaster 转发广播信号
+     * button 发送low 信号给广播broadcaster
      * <p>
      * button -low-> broadcaster
      * broadcaster -low-> a
@@ -146,5 +155,61 @@ public class Day20 {
         List<String> list = Files.readAllLines(Path.of("./src/test/resources/2023/", "day20.input"));
         list.forEach(System.out::println);
 
+        int highPulses = 0, lowPulses = 0;
+
     }
+
+    /**
+     * % 只处理low purple ，默认 off,  low off->on 发送 high ,  low on->off 发送low，如果收到high， 不处理。
+     * & 记住所有连接的发送的最新信号，默认为low，如果所有连接的信号都是high， 发送low, 否则发送high
+     * broadcaster 转发广播信号
+     * button 发送low 信号给广播broadcaster
+     */
+    class FlipFlop implements Module {
+
+        @Override
+        public boolean sendPulse() {
+            if (dest.isEmpty()) {
+                return false;
+            }
+            if (receivePurple) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    class Conjunction implements Module {
+
+        @Override
+        public boolean sendPulse() {
+            return !dest.isEmpty();
+        }
+    }
+
+    class Broadcaster implements Module {
+
+        @Override
+        public boolean sendPulse() {
+            return !dest.isEmpty();
+        }
+    }
+
+
+    interface Module {
+
+        String name = "";
+        char type = '\0';
+        boolean on = false;
+        boolean high = false;
+        boolean receivePurple = false;// low false, high true
+        boolean sendPurple = false;// low false, high true
+
+        List<String> dest = new ArrayList<>();
+        Map<String, Boolean> conn = new HashMap<>();
+
+        public boolean sendPulse();
+    }
+
+
 }
