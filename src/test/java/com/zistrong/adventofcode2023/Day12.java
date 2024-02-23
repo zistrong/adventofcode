@@ -6,10 +6,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Day12 {
     List<String> contents;
@@ -106,7 +106,7 @@ public class Day12 {
      * .###....##.#
      * In this example, the number of possible arrangements for each row is:
      * <p>
-     * ???.### 1,1,3 - 1 arrangement
+     * ???.### 1,1,3 - 1 arrangement ^[\\.]*$
      * .??..??...?##. 1,1,3 - 4 arrangements
      * ?#?#?#?#?#?#?#? 1,3,1,6 - 1 arrangement
      * ????.#...#... 4,1,1 - 1 arrangement
@@ -119,22 +119,47 @@ public class Day12 {
     @Test
     public void part1() {
 
-        long totalArrangement = 0L;
-        List<Springs> springsList = new ArrayList<>();
+        int sum = 0;
         for (String content : contents) {
             String s = content.split(" ")[0];
-            List<Integer> damagedList = Arrays.stream(content.split(" ")[1].split(","))
-                    .map(item -> Integer.parseInt(item)).collect(Collectors.toList());
 
-            springsList.add(new Springs(s, damagedList));
+            sum += test2(content.split(" ")[0], content.split(" ")[1]);
+
         }
-        System.out.println(springsList);
-        System.out.println(totalArrangement);
+        System.out.println(sum);
 
-        System.out.println("????.#...#...#.".split("[\\.]+")[4]);
     }
 
-    record Springs(String s, List<Integer> damagedList) {
+
+    public int test2(String condition, String record) {
+
+        String reg = Arrays.stream(record.split(",")).toList().stream()
+                .collect(Collectors.joining("}\\.+#{", "^\\.*#{", "}\\.*$"));
+        int numbers = Arrays.stream(record.split(",")).mapToInt(Integer::parseInt).sum()
+                - (int) condition.chars().filter(item -> item == damaged).count();
+        int ss = (int) condition.chars().filter(item -> item == '?').count();
+        int size = (int) Math.pow(2, ss);
+
+        int count = 0;
+        // 1 是# 0 是 .
+        while ((size = size - 1) >= 0) {
+            String repalceAll = condition;
+            String binary = Integer.toBinaryString(size);
+            binary = Stream.generate(() -> "0").limit(ss - binary.length()).collect(Collectors.joining()) + binary;
+            if (binary.chars().filter(item -> item == '1').count() != numbers) {
+                continue;
+            }
+
+            for (int i = 0; i < binary.length(); i++) {
+                repalceAll = repalceAll.replaceFirst("\\?",
+                        binary.charAt(i) == operational ? String.valueOf(operational) : String.valueOf(damaged));
+
+            }
+            if (repalceAll.matches(reg)) {
+                count++;
+            }
+        }
+        return count;
 
     }
 
