@@ -121,9 +121,8 @@ public class Day12 {
 
         int sum = 0;
         for (String content : contents) {
-            String s = content.split(" ")[0];
 
-            sum += test2(content.split(" ")[0], content.split(" ")[1]);
+            sum += computeCount(content.split(" ")[0], content.split(" ")[1]);
 
         }
         System.out.println(sum);
@@ -131,7 +130,7 @@ public class Day12 {
     }
 
 
-    public int test2(String condition, String record) {
+    public int computeCount(String condition, String record) {
 
         String reg = Arrays.stream(record.split(",")).toList().stream()
                 .collect(Collectors.joining("}\\.+#{", "^\\.*#{", "}\\.*$"));
@@ -143,19 +142,20 @@ public class Day12 {
         int count = 0;
         // 1 是# 0 是 .
         while ((size = size - 1) >= 0) {
-            String repalceAll = condition;
+            StringBuffer repalceAll = new StringBuffer(condition);
             String binary = Integer.toBinaryString(size);
-            binary = Stream.generate(() -> "0").limit(ss - binary.length()).collect(Collectors.joining()) + binary;
+            binary = "0".repeat(ss - binary.length()) + binary;
             if (binary.chars().filter(item -> item == '1').count() != numbers) {
                 continue;
             }
 
             for (int i = 0; i < binary.length(); i++) {
-                repalceAll = repalceAll.replaceFirst("\\?",
-                        binary.charAt(i) == operational ? String.valueOf(operational) : String.valueOf(damaged));
+                int k = repalceAll.indexOf("?");
+                        repalceAll.replace(k, k+1, binary.charAt(i) == '0' ? String.valueOf(operational)
+                        : String.valueOf(damaged));
 
             }
-            if (repalceAll.matches(reg)) {
+            if (repalceAll.toString().matches(reg)) {
                 count++;
             }
         }
