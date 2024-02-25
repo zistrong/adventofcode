@@ -260,12 +260,13 @@ public class Day14 {
             for (StringBuilder content : contents) {
                 stringBuilder.append(content);
             }
-            if (list.contains(getMD5String(stringBuilder.toString()))) {// if exist , it means the round reach a cycle, break loop
+            String md5 = getMD5String(stringBuilder.toString());
+            if (list.contains(md5)) {// if exist , it means the round reach a cycle, break loop
                 size = list.size();
                 k = list.indexOf(getMD5String(stringBuilder.toString()));
                 break;
             }
-            list.add(getMD5String(stringBuilder.toString()));
+            list.add(md5);
         }
         for (int i = 0; i < (1000000000 - k - 1) % (size - k); i++) {// get the correct loop
             round();
