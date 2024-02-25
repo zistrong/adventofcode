@@ -1,15 +1,18 @@
 package com.zistrong.adventofcode2023;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 public class Day12 {
     List<String> contents;
@@ -17,10 +20,14 @@ public class Day12 {
     char operational = '.';
     char damaged = '#';
 
+    String sOperational = String.valueOf(operational);
+    String sDamaged = String.valueOf(damaged);
+
     @Before
     public void init() throws IOException {
 
         contents = Files.readAllLines(Path.of("./src/test/resources/2023/", "day12.input"));
+        executor = Executors.newFixedThreadPool(5);
 
     }
 
@@ -106,7 +113,7 @@ public class Day12 {
      * .###....##.#
      * In this example, the number of possible arrangements for each row is:
      * <p>
-     * ???.### 1,1,3 - 1 arrangement ^[\\.]*$
+     * ???.### 1,1,3 - 1 arrangement
      * .??..??...?##. 1,1,3 - 4 arrangements
      * ?#?#?#?#?#?#?#? 1,3,1,6 - 1 arrangement
      * ????.#...#... 4,1,1 - 1 arrangement
@@ -117,49 +124,119 @@ public class Day12 {
      * For each row, count all of the different arrangements of operational and broken springs that meet the given criteria. What is the sum of those counts?
      */
     @Test
-    public void part1() {
-
+    public void part1() throws InterruptedException, ExecutionException {
         int sum = 0;
+        List<Callable<Long>> list = new ArrayList<>();
         for (String content : contents) {
-
-            sum += computeCount(content.split(" ")[0], content.split(" ")[1]);
-
+            String[] contents = content.split(" ");
+            list.add(() -> computeCount(contents[0], contents[1]));
         }
-        System.out.println(sum);
+        List<Future<Long>> futures = executor.invokeAll(list);
+
+        for (Future<Long> future : futures) {
+            sum += future.get();
+        }
+        Assert.assertEquals(7191L, sum);// 2141
+    }
+
+    private long countOnes(long n, long numbers) {
+        long count = 0;
+        while (n != 0) {
+            count += n & 1; // 如果n的最低位是1，则n & 1的结果为1，否则为0
+            if (count > numbers) {
+                return count;
+            }
+            n >>= 1; // 将n右移一位
+        }
+        return count;
 
     }
 
+    public long computeCount(String condition, String record) {
 
-    public int computeCount(String condition, String record) {
-
-        String reg = Arrays.stream(record.split(",")).toList().stream()
+        String[] strings = record.split(",");
+        String reg = Arrays.stream(strings).toList().stream()
                 .collect(Collectors.joining("}\\.+#{", "^\\.*#{", "}\\.*$"));
-        int numbers = Arrays.stream(record.split(",")).mapToInt(Integer::parseInt).sum()
-                - (int) condition.chars().filter(item -> item == damaged).count();
-        int ss = (int) condition.chars().filter(item -> item == '?').count();
-        int size = (int) Math.pow(2, ss);
-
-        int count = 0;
+        long numbers = Arrays.stream(strings).mapToInt(Integer::parseInt).sum()
+                - condition.chars().filter(item -> item == damaged).count();
+        long ss = condition.chars().filter(item -> item == '?').count();
+        long size = 1L << ss;
+        long count = 0L;
         // 1 是# 0 是 .
-        while ((size = size - 1) >= 0) {
-            StringBuffer repalceAll = new StringBuffer(condition);
-            String binary = Integer.toBinaryString(size);
-            binary = "0".repeat(ss - binary.length()) + binary;
-            if (binary.chars().filter(item -> item == '1').count() != numbers) {
+        Pattern p = Pattern.compile(reg);
+
+        int n = 1 << (numbers - 1);
+        n = Math.max(0, n);
+        while ((size = size - 1) >= n) {
+            if (countOnes(size, numbers) != numbers) {
                 continue;
             }
-
+            String binary = Long.toBinaryString(size);
+            binary = "0".repeat((int) ss - binary.length()) + binary;
+            StringBuilder replaceAll = new StringBuilder(condition);
+            int k = 0;
             for (int i = 0; i < binary.length(); i++) {
-                int k = repalceAll.indexOf("?");
-                        repalceAll.replace(k, k+1, binary.charAt(i) == '0' ? String.valueOf(operational)
-                        : String.valueOf(damaged));
-
+                k = replaceAll.indexOf("?", k);
+                replaceAll.replace(k, k + 1, binary.charAt(i) == '0' ? sOperational : sDamaged);
             }
-            if (repalceAll.toString().matches(reg)) {
+            Matcher m = p.matcher(replaceAll);
+            if (m.matches()) {
                 count++;
             }
         }
         return count;
+
+    }
+
+    /**
+     * As you look out at the field of springs, you feel like there are way more springs than the condition records list.
+     * When you examine the records, you discover that they were actually folded up this whole time!
+     * <p>
+     * To unfold the records, on each row, replace the list of spring conditions with five copies of itself (separated by ?)
+     * and replace the list of contiguous groups of damaged springs with five copies of itself (separated by ,).
+     * <p>
+     * So, this row:
+     * <p>
+     * .# 1
+     * Would become:
+     * <p>
+     * .#?.#?.#?.#?.# 1,1,1,1,1
+     * ???.### 1,1,3
+     * The first line of the above example would become:
+     * <p>
+     * ???.###????.###????.###????.###????.### 1,1,3,1,1,3,1,1,3,1,1,3,1,1,3
+     * In the above example, after unfolding, the number of possible arrangements for some rows is now much larger:
+     * <p>
+     * ???.### 1,1,3 - 1 arrangement
+     * .??..??...?##. 1,1,3 - 16384 arrangements
+     * ?#?#?#?#?#?#?#? 1,3,1,6 - 1 arrangement
+     * ????.#...#... 4,1,1 - 16 arrangements
+     * ????.######..#####. 1,6,5 - 2500 arrangements
+     * ?###???????? 3,2,1 - 506250 arrangements
+     * After unfolding, adding all of the possible arrangement counts together produces 525152.
+     * <p>
+     * Unfold your condition records; what is the new sum of possible arrangement counts?
+     */
+    @Test
+    public void part2() throws InterruptedException, ExecutionException {
+        int sum = 0;
+        List<Callable<Long>> list = new ArrayList<>();
+        for (String content : contents) {
+            String[] contents = content.split(" ");
+            list.add(() -> computeCount(IntStream.range(0, 5).mapToObj(i -> contents[0]).collect(Collectors.joining("?")),
+                    IntStream.range(0, 5).mapToObj(i -> contents[1]).collect(Collectors.joining(","))));
+        }
+        List<Future<Long>> futures = executor.invokeAll(list);
+
+        for (Future<Long> future : futures) {
+            sum += future.get();
+        }
+    }
+
+    ExecutorService executor;
+
+    @Test
+    public void part3() {
 
     }
 
