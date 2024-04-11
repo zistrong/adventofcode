@@ -160,6 +160,7 @@ public class Day20 {
     }
 
     /**
+     *
      * % 只处理low purple ，默认 off,  low off->on 发送 high ,  low on->off 发送low，如果收到high， 不处理。
      * & 记住所有连接的发送的最新信号，默认为low，如果所有连接的信号都是high， 发送low, 否则发送high
      * broadcaster 转发广播信号
