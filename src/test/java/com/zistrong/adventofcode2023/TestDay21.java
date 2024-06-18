@@ -1,17 +1,17 @@
 package com.zistrong.adventofcode2023;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Day21 {
+public class TestDay21 {
 
 
     /**
@@ -105,43 +105,37 @@ public class Day21 {
     Node[][] nodes;
     Set<Node> first = new HashSet<>();
 
+
+    private void process(Node node, Set<Node> second, int direct) {
+        if (dotSet.contains((node.i + direct) + "-" + node.j)) {
+            second.add(nodes[node.i + direct][node.j]);
+        }
+        if (dotSet.contains((node.i) + "-" + (node.j + direct))) {
+            second.add(nodes[node.i][node.j + direct]);
+        }
+    }
+
     @Test
     public void part1() throws IOException {
-        int step = 6;
+        int step = 64;
         Set<Node> second = new HashSet<>();
         while (step-- > 0) {
             for (Node node : first) {
-                // top
-                if (node.i - 1 >= 0 && nodes[node.i - 1][node.j].c == DOT) {
-                    second.add(nodes[node.i - 1][node.j]);
-                }
-                // bottom
-                if (node.i + 1 < nodes.length && nodes[node.i + 1][node.j].c == DOT) {
-                    second.add(nodes[node.i + 1][node.j]);
-                }
-                // left
-                if (node.j - 1 >= 0 && nodes[node.i][node.j - 1].c == DOT) {
-                    second.add(nodes[node.i][node.j - 1]);
-                }
-                // right
-                if (node.j + 1 < nodes[node.i].length && nodes[node.i][node.j + 1].c == DOT) {
-                    second.add(nodes[node.i][node.j + 1]);
-                }
+                process(node, second, 1);
+                process(node, second, -1);
             }
             first = second;
             second = new HashSet<>();
         }
-        System.out.println(first.size());
+        Assert.assertEquals(3600, first.size());
     }
 
     private static final char DOT = '.';
 
-    static class Node implements Serializable {
-        char c;
-        int i;
-        int j;
-        int count = 1;
+    record Node(int i, int j) {
     }
+
+    Set<String> dotSet = new HashSet<>();
 
     @Before
     public void init() throws IOException {
@@ -154,13 +148,12 @@ public class Day21 {
             String line = list.get(i);
             for (int j = 0; j < line.length(); j++) {
                 char c = line.charAt(j);
-                Node node = new Node();
-                node.c = c;
-                node.i = i;
-                node.j = j;
+                Node node = new Node(i, j);
                 if (c == 'S') {
                     first.add(node);
-                    node.c = DOT;
+                    dotSet.add(node.i + "-" + node.j);
+                } else if (c == DOT) {
+                    dotSet.add(node.i + "-" + node.j);
                 }
                 nodes[i][j] = node;
             }
@@ -228,31 +221,6 @@ public class Day21 {
     @Test
     public void part2() {
 
-        //循环使用， 比如0的， 先上的就是最后一个， 如果是最后一个就是第一个
-        int step = 6;
-        Set<Node> second = new HashSet<>();
-        while (step-- > 0) {
-            for (Node node : first) {
-                // top
-                if (node.i - 1 >= 0 && nodes[node.i - 1][node.j].c == DOT) {
-                    second.add(nodes[node.i - 1][node.j]);
-                }
-                // bottom
-                if (node.i + 1 < nodes.length && nodes[node.i + 1][node.j].c == DOT) {
-                    second.add(nodes[node.i + 1][node.j]);
-                }
-                // left
-                if (node.j - 1 >= 0 && nodes[node.i][node.j - 1].c == DOT) {
-                    second.add(nodes[node.i][node.j - 1]);
-                }
-                // right
-                if (node.j + 1 < nodes[node.i].length && nodes[node.i][node.j + 1].c == DOT) {
-                    second.add(nodes[node.i][node.j + 1]);
-                }
-            }
-            first = second;
-            second = new HashSet<>();
-        }
-        System.out.println(first.stream().map(item -> item.count).mapToInt(item -> item).sum());
+
     }
 }
